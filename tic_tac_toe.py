@@ -25,13 +25,13 @@ class Environment:
         for i in range(LENGTH):
             print ("---------------")
             for j in range(LENGTH):
-                print (" ", end='')
+                print("", end='')
                 if self.board[i, j] == self.x:
-                    print("x", end = '')
+                    print("X |", end='')
                 elif self.board[i, j] == self.o:
-                    print("o", end = '')
+                    print("O |", end='')
                 else:
-                    print(' ', end = '')
+                    print('  |', end='')
             print ("")
         print("-----------------")
 
@@ -126,7 +126,7 @@ class Agent:
             possible_moves = []
             for i in range(LENGTH):
                 for j in range(LENGTH):
-                    if env.is_empty(j,j):
+                    if env.is_empty(i,j):
                         possible_moves.append((i,j))
             idx = np.random.choice(len(possible_moves))
             next_move = possible_moves[idx]
@@ -154,14 +154,17 @@ class Agent:
                             print("%.2f|"%pos2value[(i,j)], end='')
                         else:
                             print (" ", end='')
-                            if self.board[i, j] == self.x:
-                                print("x |", end = '')
-                            elif self.board[i, j] == self.o:
-                                print("o |", end = '')
+                            if env.board[i, j] == env.x:
+                                print("X |", end='')
+                            elif env.board[i, j] == env.o:
+                                print("O |", end='')
                             else:
-                                print('  |', end = '')
+                                print('  |', end='')
                     print ("")
                 print("-----------------")
+        
+        # make the move
+        env.board[next_move[0], next_move[1]] = self.sym
 
 
     def update(self, env):
@@ -175,7 +178,7 @@ class Agent:
         
         self.reset_history()
 
-    def update_state_history(self, state):
+    def update_state_history(self, s):
         self.state_history.append(s)
 
 def get_state_hash_and_winner(env, i=0, j=0):
@@ -186,7 +189,7 @@ def get_state_hash_and_winner(env, i=0, j=0):
         if j == 2:
             if i == 2:
                 state = env.get_state()
-                ended = env.game_over()
+                ended = env.game_over(force_recalculate=True)
                 winner = env.winner
                 results.append((state, winner, ended))
             else:
@@ -279,6 +282,7 @@ class Human:
     def update_state_history(self, s):
         pass
 
+
 if __name__ == '__main__':
     p1 = Agent()
     p2 = Agent()
@@ -289,7 +293,7 @@ if __name__ == '__main__':
     Vx = initialV_x(env, state_winner_triples)
     p1.setV(Vx)
     Vo = initialV_o(env, state_winner_triples)
-    p1.setV(Vo)
+    p2.setV(Vo)
 
     p1.set_symbol(env.x)
     p2.set_symbol(env.o)
