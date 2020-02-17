@@ -35,7 +35,7 @@ class Grid: #Environment
             elif action == 'R':
                 self.j += 1
             
-            return self.rewards.get((self.i, self.j), 0)
+        return self.rewards.get((self.i, self.j), 0)
 
     def undo_move(self, action):
         if action == 'U':
