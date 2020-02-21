@@ -7,7 +7,7 @@ from monte_carlo_es import max_dict
 GAMMA = 0.9
 ALL_POSSIBLE_ACTIONS = ('U', 'D', 'L', 'R')
 
-def random_action(a, eps = 0.1):
+def random_action(a, eps = 0.2):
     p = np.random.random()
 
     if p < (1 - eps):
@@ -25,17 +25,17 @@ def play_game(grid, policy):
         r = grid.move(a)
         s = grid.current_state()
         if grid.game_over():
-            states_actions_rewards.append((2, None, r))
+            states_actions_rewards.append((s, None, r))
             break
         else:
-            a = random_action(policy[s])
+            a = random_action(policy[s]) # the next state is stochastic
             states_actions_rewards.append((s, a, r))
     # calculate the returns by working backwards
     G = 0
     states_actions_returns = []
     first = True
     for s, a, r in reversed(states_actions_rewards):
-        if first == True:
+        if first:
             first = False
         else:
             states_actions_returns.append((s, a, G))
@@ -46,6 +46,7 @@ def play_game(grid, policy):
 
 if __name__=='__main__':
     grid = negative_grid(step_cost=-0.1)
+    
     print ('rewards:')
     print_values(grid.rewards, grid)
 
@@ -62,16 +63,17 @@ if __name__=='__main__':
         if s in grid.actions:
             Q[s] = {}
             for a in ALL_POSSIBLE_ACTIONS:
-                Q[s][a]=0
-                returns[(s,a)]=[]
+                Q[s][a] = 0
+                returns[(s,a)] = []
         else:
             pass
     
     # repeat until convergence
     deltas = []
-    for t in range(5000):
+    for t in range(1000):
         if t % 500 == 0:
             print(t)
+            print_policy(policy, grid)
 
         # generate an episode using pi
         biggest_change = 0
@@ -90,10 +92,10 @@ if __name__=='__main__':
         
         deltas.append(biggest_change)
 
-    # calculate new policy pi(s) = argmax[a]{Q(s,a)}
-    for s in policy.keys():
-        a, _ = max_dict(Q[s])
-        policy[s] = a
+        # calculate new policy pi(s) = argmax[a]{Q(s,a)}
+        for s in policy.keys():
+            a, _ = max_dict(Q[s])
+            policy[s] = a
             
     plt.plot(deltas)
     plt.show()
